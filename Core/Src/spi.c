@@ -21,6 +21,7 @@
 #include "spi.h"
 
 /* USER CODE BEGIN 0 */
+#include <string.h>
 
 /* USER CODE END 0 */
 
@@ -191,5 +192,34 @@ void HAL_SPI_MspDeInit(SPI_HandleTypeDef* spiHandle)
 }
 
 /* USER CODE BEGIN 1 */
+int8_t user_spi_read(uint8_t dev_id, uint8_t reg_addr, uint8_t *reg_data, uint16_t len)
+{
+  int8_t rslt = 0; /* Return 0 for Success, non-zero for failure */
 
+  HAL_GPIO_WritePin(SPI1_CS_GPIO_Port, SPI1_CS_Pin, GPIO_PIN_RESET);
+  if (HAL_SPI_Transmit(&hspi1, &reg_addr, 1, 0x10) != HAL_OK)
+    return -1;
+  if (HAL_SPI_Receive(&hspi1, reg_data, len, 0x10) != HAL_OK)
+    return -1;
+  HAL_GPIO_WritePin(SPI1_CS_GPIO_Port, SPI1_CS_Pin, GPIO_PIN_SET);
+
+  return rslt;
+}
+
+int8_t user_spi_write(uint8_t dev_id, uint8_t reg_addr, uint8_t *reg_data, uint16_t len)
+{
+  int8_t rslt = 0; /* Return 0 for Success, non-zero for failure */
+
+  uint8_t writeData[len + 1];
+  writeData[0] = reg_addr & 0x7F;
+  memcpy(writeData + 1, reg_data, len);
+
+  HAL_GPIO_WritePin(SPI1_CS_GPIO_Port, SPI1_CS_Pin, GPIO_PIN_RESET);
+  // if (HAL_SPI_Transmit(&hspi1, reg_data, len, 0xffff) != HAL_OK)
+  if (HAL_SPI_Transmit(&hspi1, writeData, len + 1, 0x10) != HAL_OK)
+    return -1;
+  HAL_GPIO_WritePin(SPI1_CS_GPIO_Port, SPI1_CS_Pin, GPIO_PIN_SET);
+
+  return rslt;
+}
 /* USER CODE END 1 */

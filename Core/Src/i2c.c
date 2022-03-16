@@ -182,5 +182,39 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef* i2cHandle)
 }
 
 /* USER CODE BEGIN 1 */
+int8_t user_i2c_read(uint8_t dev_id, uint8_t reg_addr, uint8_t *reg_data, uint16_t len)
+{
+  int8_t rslt = 0; /* Return 0 for Success, non-zero for failure */
 
+  HAL_StatusTypeDef status = HAL_OK;
+  status = HAL_I2C_Mem_Read(&hi2c1, dev_id << 1, reg_addr, I2C_MEMADD_SIZE_8BIT, reg_data, len, 0xffff);
+
+  if (status == HAL_OK)
+  {
+    rslt = 0;
+  }
+  else
+  {
+    rslt = -1;
+  }
+  return rslt;
+}
+
+int8_t user_i2c_write(uint8_t dev_id, uint8_t reg_addr, uint8_t *reg_data, uint16_t len)
+{
+  int8_t rslt = 0; /* Return 0 for Success, non-zero for failure */
+
+  HAL_StatusTypeDef status = HAL_OK;
+  status = HAL_I2C_Mem_Write(&hi2c1, dev_id << 1, reg_addr, I2C_MEMADD_SIZE_8BIT, reg_data, len, 0xffff);
+
+  if (status == HAL_OK)
+  {
+    rslt = 0;
+  }
+  else
+  {
+    rslt = -1;
+  }
+  return rslt;
+}
 /* USER CODE END 1 */

@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include "key.h"
 #include "uart.h"
+#include "bme280app.h"
 
 /* USER CODE END Includes */
 
@@ -42,12 +43,16 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
+/** @name BME280 (I2C / SPI) */
+// #define BME280_I2C_ENABLE 1
+#define BME280_SPI_ENABLE 1
 
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+uint8_t key_toggle = 0;
 char startMessage[] = "** UART communication based on IT **\r\n";
 /* USER CODE END PV */
 
@@ -69,7 +74,7 @@ void SystemClock_Config(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+  uint8_t bme280_on = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -101,6 +106,50 @@ int main(void)
   Uart2_printf(startMessage);
   HAL_UART_Receive_IT(&huart1, (uint8_t *)rxBuffer, 15);
   HAL_UART_Receive_IT(&huart2, (uint8_t *)rxBuffer2, 15);
+
+#ifdef BME280_I2C_ENABLE
+  struct bme280_dev dev;
+  int8_t rslt = BME280_OK;
+
+  dev.dev_id = BME280_I2C_ADDR_SEC;
+  dev.intf = BME280_I2C_INTF;
+  dev.read = user_i2c_read;
+  dev.write = user_i2c_write;
+  dev.delay_ms = HAL_Delay;
+
+  rslt = bme280_init(&dev);
+  Uart1_printf("The init result is:%d\r\n", rslt);
+
+  // before you init bme280, you can choose to do a selftest
+  rslt = bme280_crc_selftest(&dev);
+  if (rslt == 0)
+  {
+    Uart1_printf("BME280 self test pass\r\n");
+  }
+#endif // BME280_I2C_ENABLE
+
+#ifdef BME280_SPI_ENABLE
+  struct bme280_dev dev;
+  int8_t rslt = BME280_OK;
+
+  /* Sensor_0 interface over SPI with native chip select line */
+  dev.dev_id = 0;
+  dev.intf = BME280_SPI_INTF;
+  dev.read = user_spi_read;
+  dev.write = user_spi_write;
+  dev.delay_ms = HAL_Delay;
+
+  rslt = bme280_init(&dev);
+  printf("BME280 init result is:%d\r\n", rslt);
+
+  // before you init bme280, you can choose to do a selftest
+  rslt = bme280_crc_selftest(&dev);
+  if (rslt == 0)
+  {
+    printf("BME280 self test pass\r\n");
+  }
+#endif // BME280_SPI_ENABLE
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -110,12 +159,19 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    // HAL_Delay(500);
+    HAL_Delay(200);
     if (Key_Scan(KEY1_GPIO_Port, KEY1_Pin) == KEY_ON)
     {
+      key_toggle = 1;
       // D2 反转
       HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+      bme280_on = !bme280_on;
     }
+    // BME280 sensor data
+    if (bme280_on)
+      get_sensor_data(&dev);
+
+    key_toggle = 0;
   }
   /* USER CODE END 3 */
 }
