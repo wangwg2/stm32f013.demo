@@ -43,7 +43,8 @@ void MX_USART1_UART_Init(void);
 void MX_USART2_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+void Uart1_printf(const char *format, ...);
+void Uart2_printf(const char *format, ...);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

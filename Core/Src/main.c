@@ -23,6 +23,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdio.h>
+#include "key.h"
+#include "uart.h"
 
 /* USER CODE END Includes */
 
@@ -43,7 +46,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+char startMessage[] = "** UART communication based on IT **\r\n";
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -88,7 +91,10 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  Uart1_printf(startMessage);
+  Uart2_printf(startMessage);
+  HAL_UART_Receive_IT(&huart1, (uint8_t *)rxBuffer, 15);
+  HAL_UART_Receive_IT(&huart2, (uint8_t *)rxBuffer2, 15);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -98,6 +104,12 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    // HAL_Delay(500);
+    if (Key_Scan(KEY1_GPIO_Port, KEY1_Pin) == KEY_ON)
+    {
+      // D2 反转
+      HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+    }
   }
   /* USER CODE END 3 */
 }
