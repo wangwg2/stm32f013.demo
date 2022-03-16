@@ -226,4 +226,16 @@ void Uart2_printf(const char *format, ...)
 
   HAL_UART_Transmit_IT(&huart2, printf_temp, len);
 }
+
+/**
+ * @brief printf 重定向
+ *
+ * @note gnu对printf的底层实现跟keil是不同的。
+ *       gnu下是_write函数实现的，需要改写这个函数 而fputc函数就不用管了
+ */
+int _write(int fd, char *pBuffer, int size)
+{
+  HAL_UART_Transmit_IT(&huart1, (uint8_t *)pBuffer, size);
+  return size;
+}
 /* USER CODE END 1 */

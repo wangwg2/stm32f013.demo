@@ -86,3 +86,27 @@ STM32F103C8T6                      Function         Connect (OLED)
 27  PB14  GPIO_Output OLED_DC      OLED_DC          DC  (OLED)
 28  PB15  SPI2_MOSI                SPI2_MOSI        D1  (OLED)
 ```
+
+
+## STM32F103C8T6 SHT31温度传感器
+使用 STM32CubeMX 生成 Makefile 开发项目， 使用 VS Code 开发。
+
+- `Core` 生成代码目录，可以改动
+- `Drivers` 生成代码目录，不改动
+- `User` 用户代码目录
+
+#### 功能说明
+- 按键(K0) 控制 LED(D2) 点亮/熄灭
+- UART 通信 (使用 UART1/UART2)
+- LPC845模拟SHT31温度传感器 (I2C)
+
+#### SHT31 (I2C) 
+SHT31温度传感器
+```
+STM32F103C8T6               SHT31
+-------------------------------------------------
+42  PB6   I2C1_SCL          TX (SCL)
+43  PB7   I2C1_SDA          RX (SDA)
+21  PB10  I2C2_SCL
+22  PB11  I2C2_SDA
+```

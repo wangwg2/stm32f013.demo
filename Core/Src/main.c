@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include "key.h"
 #include "uart.h"
-
+#include "sht31.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -42,12 +42,16 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
+/** @name SHT31 (I2C) */
+#define SHT31_I2C_ENABLE 1
+// #define SENDBACK_I2C_ENABLE 1
 
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+uint8_t key_toggle = 0;
 char startMessage[] = "** UART communication based on IT **\r\n";
 /* USER CODE END PV */
 
@@ -97,6 +101,40 @@ int main(void)
   MX_SPI1_Init();
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
+#ifdef SENDBACK_I2C_ENABLE
+  uint8_t sendback_i2c_on = 0;
+  HAL_StatusTypeDef status;
+  // 使能主机中断接收
+  status = HAL_I2C_Master_Receive_IT(&hi2c1, SENDBACK_I2C_ADDR_READ, I2C_recvBuf, sizeof(I2C_recvBuf));
+  if (status != HAL_OK)
+  {
+    HAL_I2C_StateTypeDef error_status = HAL_I2C_GetState(&hi2c1);
+    printf("HAL_I2C_Master_Receive_IT err1:%02x -- err2:%02x\r\n", status, error_status);
+    return -1;
+  }
+#endif // SENDBACK_I2C_ENABLE
+#ifdef SHT31_I2C_ENABLE
+  uint8_t sht31_i2c_on = 0;
+  HAL_StatusTypeDef status;
+  SHT31_DATA sht31_data;
+  uint8_t I2C_sendBuf[2] = {0x24, 0x00};
+  uint8_t I2C_recvdBuf[6];
+  HAL_Delay(200);
+
+#if 0
+  sht31_get_data(&sht31_data);
+  printf("SHT31 temperature: %d, humidity: %d\r\n", sht31_data.temperature, sht31_data.humidity);
+  HAL_Delay(200);
+
+  sht31_reset();
+  if (sht31_init() == HAL_OK)
+    printf("SHT31 init OK\n");
+  else
+    printf("SHT31 init FAIL\n");
+  HAL_Delay(2000);
+#endif // 0
+#endif // SHT31_I2C_ENABLE
+  
   Uart1_printf(startMessage);
   Uart2_printf(startMessage);
   HAL_UART_Receive_IT(&huart1, (uint8_t *)rxBuffer, 15);
@@ -110,12 +148,60 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    // HAL_Delay(500);
+    HAL_Delay(200);
     if (Key_Scan(KEY1_GPIO_Port, KEY1_Pin) == KEY_ON)
     {
+      key_toggle = 1;
       // D2 反转
       HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+#ifdef SENDBACK_I2C_ENABLE
+      sendback_i2c_on = !sendback_i2c_on;
+#endif // SENDBACK_I2C_ENABLE
+#ifdef SHT31_I2C_ENABLE
+      sht31_i2c_on = !sht31_i2c_on;
+#endif // SHT31_I2C_ENABLE
     }
+#ifdef SENDBACK_I2C_ENABLE
+    if (sendback_i2c_on)
+    {
+      i2c_send_data();
+    }
+#endif // SENDBACK_I2C_ENABLE
+#ifdef SHT31_I2C_ENABLE
+    if (sht31_i2c_on)
+    {
+      // status = HAL_I2C_Master_Transmit(&hi2c1, SHT31_ADDR_WRITE, I2C_sendBuf, sizeof(I2C_sendBuf), 0x50);
+      // if (status != HAL_OK)
+      // {
+      //   HAL_I2C_StateTypeDef error_status = HAL_I2C_GetState(&hi2c1);
+      //   printf("HAL_I2C_Master_Transmit err1:%02x -- err2:%02x\r\n", status, error_status);
+      // }
+      status = HAL_I2C_Master_Receive(&hi2c1, SHT31_ADDR_READ, I2C_recvdBuf, sizeof(I2C_recvdBuf), 0x50);
+      if (status != HAL_OK)
+      {
+        HAL_I2C_StateTypeDef error_status = HAL_I2C_GetState(&hi2c1);
+        printf("HAL_I2C_Master_Receive err1:%02x -- err2:%02x\r\n", status, error_status);
+      }
+      sht31_parse_data(&sht31_data, I2C_recvdBuf);
+#if 0      
+      sht31_reset();
+      if (sht31_init() == HAL_OK)
+        printf("SHT31 init OK\n");
+      else
+        printf("SHT31 init FAIL\n");
+      HAL_Delay(20);
+      if (sht31_get_data(&sht31_data) == HAL_OK)
+      {
+        printf("SHT31 temperature: %d, humidity: %d\r\n", sht31_data.temperature, sht31_data.humidity);
+      }
+      else
+      {
+        printf("SHT31 error!\r\n");
+      }
+#endif // 0
+    }
+#endif // SHT31_I2C_ENABLE
+    key_toggle = 0;
   }
   /* USER CODE END 3 */
 }
