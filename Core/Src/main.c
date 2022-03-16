@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include "key.h"
 #include "uart.h"
+#include "oled.h"
 
 /* USER CODE END Includes */
 
@@ -42,12 +43,15 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
+/** @name OLED (SPI) */
+#define OLED_SPI_ENABLE 1
 
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+uint8_t key_toggle = 0;
 char startMessage[] = "** UART communication based on IT **\r\n";
 /* USER CODE END PV */
 
@@ -101,6 +105,16 @@ int main(void)
   Uart2_printf(startMessage);
   HAL_UART_Receive_IT(&huart1, (uint8_t *)rxBuffer, 15);
   HAL_UART_Receive_IT(&huart2, (uint8_t *)rxBuffer2, 15);
+
+#ifdef OLED_SPI_ENABLE
+  uint8_t oled_show = 0;
+  OLED_Init();
+  OLED_Clear();
+  OLED_On();
+  OLED_ShowStr(0, 0, "Welcome to STM32!");
+  HAL_Delay(2000);
+  OLED_Off();
+#endif // OLED_SPI_ENABLE
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -110,12 +124,32 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    // HAL_Delay(500);
+    HAL_Delay(200);
     if (Key_Scan(KEY1_GPIO_Port, KEY1_Pin) == KEY_ON)
     {
+      key_toggle = 1;
       // D2 反转
       HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+#ifdef OLED_SPI_ENABLE
+      oled_show = !oled_show;
+#endif // OLED_SPI_ENABLE
     }
+#ifdef OLED_SPI_ENABLE
+    if (key_toggle)
+    {
+      if (oled_show)
+      {
+        OLED_On();
+        OLED_Clear();
+        OLED_ShowStr(0, 0, "Hello, STM32F103!");
+      }
+      else
+      {
+        OLED_Off();
+      }
+    }
+#endif // OLED_SPI_ENABLE
+    key_toggle = 0;
   }
   /* USER CODE END 3 */
 }

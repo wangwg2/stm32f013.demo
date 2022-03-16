@@ -83,6 +83,32 @@ STM32F103C8T6                      Function         Connect (OLED)
 19  PB1   GPIO_Output OLED_RES     (OLED_RES)       RES (OLED)
 25  PB12  GPIO_Output SPI2_CS      SPI2_CS          CS  (OLED)
 26  PB13  SPI2_SCK                 SPI2_SCK         D0  (OLED)
-27  PB14  GPIO_Output OLED_DC      OLED_DC          DC  (OLED)
+27  PB14  GPIO_Output SPI2_CS      SPI2_CS          CS  (OLED)
+28  PB15  SPI2_MOSI                SPI2_MOSI        D1  (OLED)
+```
+
+
+## STM32F103C8T6 OLED
+使用 STM32CubeMX 生成 Makefile 开发项目， 使用 VS Code 开发。
+
+- `Core` 生成代码目录，可以改动
+- `Drivers` 生成代码目录，不改动
+- `User` 用户代码目录
+
+#### 功能说明
+- 按键(K0) 控制 LED(D2) 点亮/熄灭
+- UART 通信 (使用 UART1/UART2)
+- OLED (SPI) 屏幕显示欢迎信息，按键(K0) 控制 OLED 开关
+
+
+#### OLED (SPI)
+OLED (SPI#2)
+```
+STM32F103C8T6                      Function         Connect (OLED)
+-----------------------------------------------------------------------
+19  PB1   GPIO_Output OLED_RES     (OLED_RES)       RES (OLED)
+25  PB12  GPIO_Output OLED_DC      OLED_DC          DC  (OLED)
+26  PB13  SPI2_SCK                 SPI2_SCK         D0  (OLED)
+27  PB14  GPIO_Output SPI2_CS      SPI2_CS          CS  (OLED)
 28  PB15  SPI2_MOSI                SPI2_MOSI        D1  (OLED)
 ```

@@ -46,6 +46,7 @@ Core/Src/i2c.c \
 Core/Src/spi.c \
 User/key/key.c \
 User/uart/uart.c \
+User/oled/oled.c \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio_ex.c \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim.c \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.c \
@@ -121,6 +122,7 @@ C_INCLUDES =  \
 -ICore/Inc \
 -IUser/key \
 -IUser/uart \
+-IUser/oled \
 -IDrivers/STM32F1xx_HAL_Driver/Inc \
 -IDrivers/STM32F1xx_HAL_Driver/Inc/Legacy \
 -IDrivers/CMSIS/Device/ST/STM32F1xx/Include \
