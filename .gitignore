@@ -1,0 +1,32 @@
+# Keil Generated output files in the sub-directories .\Listings and .\Objects
+Listings/
+Objects/
+*.lst
+*.o
+*.d
+*.crf
+*.lnp
+*.axf
+*.htm
+*.build_log.htm
+*.dep
+*.iex
+*.i
+*.bin
+*.hex
+*.elf
+*.map
+
+.vscode
+.mxproject
+sm32f103c8.pdf
+sm32f103c8.txt
+openocd.cfg
+*.bak
+
+#Keil Project screen layout file
+*.uvguix.*
+*.uvgui.*
+
+#JLINK file
+JLinkLog.txt
